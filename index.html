@@ -1,243 +1,445 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8" />
-<title>Overlay Placar</title>
+<!-- saved from url=(0043)file:///C:/Users/mazitek/Desktop/index.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overlay Placar Sinuca</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
+    body {
+      background: transparent;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
 
-body{
-background:transparent;
-font-family:Arial;
-overflow:hidden;
-}
+    .scoreboard-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding-top: 16px;
+    }
 
-.scoreboard-wrap{
-display:flex;
-justify-content:center;
-padding-top:16px;
-}
+    .scoreboard {
+      min-width: 1100px;
+      background: linear-gradient(180deg, rgba(18,18,18,0.97), rgba(5,5,5,0.94));
+      border: 2px solid rgba(255,255,255,0.10);
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.45);
+      overflow: hidden;
+    }
 
-.scoreboard{
-min-width:1100px;
-background:linear-gradient(180deg, rgba(18,18,18,0.97), rgba(5,5,5,0.94));
-border-radius:18px;
-overflow:hidden;
-}
+    .series-bar {
+      display: grid;
+      grid-template-columns: 1fr 260px 1fr;
+      align-items: center;
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      min-height: 56px;
+      padding: 4px 0;
+      gap: 0;
+    }
 
-/* TOPO */
-.series-bar{
-display:grid;
-grid-template-columns:1fr 260px 1fr;
-min-height:56px;
-background:rgba(255,255,255,0.05);
-}
+    .top-info-wrap {
+      background: linear-gradient(180deg, #101010, #1b1b1b);
+      border-left: 2px solid rgba(255,255,255,0.08);
+      border-right: 2px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 4px 8px 5px;
+      min-height: 48px;
+    }
 
-.top-info-wrap{
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-background:#141414;
-}
+    .mini-label {
+      text-align: center;
+      color: white;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.72;
+      line-height: 1;
+    }
 
-/* 🔥 ALTERADO AQUI */
-.mini-main{
-color:white;
-font-size:26px;
-font-weight:900;
-text-align:center;
-}
+    .mini-main {
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1;
+      text-transform: uppercase;
+      text-align: center;
+    }
 
-/* 🔥 ALTERADO AQUI */
-.mini-sub{
-color:white;
-font-size:14px;
-text-align:center;
-}
+    .mini-sub {
+      color: rgba(255,255,255,0.82);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+      text-align: center;
+    }
 
-/* 🔥 ALTERADO AQUI */
-.city-main{
-font-size:22px;
-font-weight:900;
-}
+    .city-main {
+      font-size: 18px;
+    }
 
-.mini-label{
-font-size:10px;
-color:white;
-opacity:.6;
-}
+    .series-center-wrap {
+      background: linear-gradient(180deg, #101010, #1b1b1b);
+      border-left: 2px solid rgba(255,255,255,0.08);
+      border-right: 2px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 4px 0 5px;
+    }
 
-/* SERIES */
-.series-center-wrap{
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-background:#111;
-}
+    .series-label {
+      text-align: center;
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      line-height: 1;
+    }
 
-.series-label{
-font-size:10px;
-color:white;
-}
+    .series-score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
 
-.series-score{
-display:flex;
-gap:6px;
-}
+    .series-box {
+      width: 38px;
+      height: 28px;
+      background: box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      color: #FFD700;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
 
-.series-box{
-width:38px;
-height:28px;
-background:white;
-display:flex;
-justify-content:center;
-align-items:center;
-font-weight:bold;
-}
+    .series-x {
+      color: white;
+      font-weight: 900;
+      font-size: 12px;
+      opacity: 0.9;
+    }
 
-.series-x{color:white}
+    .top-bar {
+      display: grid;
+      grid-template-columns: 1fr 260px 1fr;
+      align-items: stretch;
+      min-height: 106px;
+    }
 
-/* PLACAR */
-.top-bar{
-display:grid;
-grid-template-columns:1fr 260px 1fr;
-}
+    .team {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+    }
 
-.team{
-display:flex;
-justify-content:center;
-align-items:center;
-color:white;
-font-size:28px;
-font-weight:bold;
-padding:10px;
-}
+    .team.left {
+      background: linear-gradient(90deg, #1565c0, #1e88e5);
+    }
 
-.left{background:#1565c0}
-.right{background:#ef6c00}
+    .team.right {
+      background: linear-gradient(90deg, #ef6c00, #fb8c00);
+    }
 
-.center-score{
-display:flex;
-justify-content:center;
-align-items:center;
-gap:10px;
-background:#000;
-}
+    .team-name {
+      color: white;
+      font-size: 40px;
+      font-weight: 900;
+      text-transform: uppercase;
+      text-align: center;
+      min-width: 220px;
+      letter-spacing: 1px;
+    }
 
-.score-box{
-width:70px;
-height:70px;
-background:white;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:40px;
-font-weight:bold;
-border-radius:10px;
-}
+    .center-score {
+      background: linear-gradient(180deg, #101010, #1b1b1b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      border-left: 2px solid rgba(255,255,255,0.08);
+      border-right: 2px solid rgba(255,255,255,0.08);
+    }
 
-.x-divider{color:white}
+    .score-box {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      background: #f5f5f5;
+      color: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 900;
+      box-shadow: inset 0 -4px 8px rgba(0,0,0,0.15);
+    }
 
-/* BOLAS */
-.bottom-bar{
-display:grid;
-grid-template-columns:1fr 1fr;
-background:#000;
-padding:10px;
-}
+    .x-divider {
+      color: white;
+      font-size: 24px;
+      font-weight: 900;
+      opacity: 0.9;
+    }
 
-.balls-group{
-display:flex;
-justify-content:center;
-gap:6px;
-flex-wrap:wrap;
-}
+    .bottom-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 10px 0 12px;
+      background: rgba(0,0,0,0.84);
+      gap: 6px;
+    }
 
-.ball{
-width:28px;
-height:28px;
-border-radius:50%;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:12px;
-color:white;
-}
+    .balls-group {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 0 16px;
+      min-height: 34px;
+    }
 
-.hidden{display:none;}
-</style>
+    .ball {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      border: 2px solid rgba(255,255,255,0.8);
+      user-select: none;
+      box-shadow: inset 0 -3px 5px rgba(0,0,0,0.22), 0 2px 5px rgba(0,0,0,0.35);
+      transition: opacity .15s ease, transform .15s ease, filter .15s ease;
+    }
 
+    .ball.off {
+      opacity: 0.18;
+      filter: grayscale(100%);
+      transform: scale(0.92);
+    }
+
+    .yellow { background: #fdd835; color: #111; }
+    .blue   { background: #1e88e5; color: white; }
+    .red    { background: #e53935; color: white; }
+    .purple { background: #8e24aa; color: white; }
+    .orange { background: #fb8c00; color: white; }
+    .green  { background: #43a047; color: white; }
+    .brown  { background: #6d4c41; color: white; }
+    .black  { background: #111; color: white; }
+    .wine   { background: #7b1f1f; color: white; }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="scoreboard-wrap">
+    <div class="scoreboard">
+      <div class="series-bar">
+        <div class="top-info-wrap">
+          <div class="mini-label">HORA</div>
+          <div class="mini-main" id="clockValue">20:46</div>
+          <div class="mini-sub" id="dateValue">03/04/2026</div>
+        </div>
 
-<div class="scoreboard-wrap">
-<div class="scoreboard">
+        <div class="series-center-wrap">
+          <div class="series-label" id="seriesLabel">SÉRIES</div>
+          <div class="series-score">
+            <div class="series-box" id="series1">0</div>
+            <div class="series-x">X</div>
+            <div class="series-box" id="series2">0</div>
+          </div>
+        </div>
 
-<!-- TOPO -->
-<div class="series-bar">
+        <div class="top-info-wrap">
+          <div class="mini-label">CIDADE</div>
+          <div class="mini-main city-main" id="cityValue">SÃO PAULO</div>
+        </div>
+      </div>
 
-<div class="top-info-wrap">
-<div class="mini-label">HORA</div>
-<div class="mini-main" id="clockValue">00:00</div>
-<div class="mini-sub" id="dateValue">01/01/2026</div>
-</div>
+      <div class="top-bar">
+        <div class="team left">
+          <div class="team-name" id="name1">MAZITEK</div>
+        </div>
 
-<div class="series-center-wrap">
-<div class="series-label">SÉRIES</div>
-<div class="series-score">
-<div class="series-box" id="series1">0</div>
-<div class="series-x">X</div>
-<div class="series-box" id="series2">0</div>
-</div>
-</div>
+        <div class="center-score">
+          <div class="score-box" id="score1">0</div>
+          <div class="x-divider">X</div>
+          <div class="score-box" id="score2">0</div>
+        </div>
 
-<div class="top-info-wrap">
-<div class="mini-label">CIDADE</div>
-<div class="mini-main city-main" id="cityValue">SÃO PAULO</div>
-</div>
+        <div class="team right">
+          <div class="team-name" id="name2">MAZINHO</div>
+        </div>
+      </div>
 
-</div>
+      <div class="bottom-bar hidden" id="bottomBar">
+        <div class="balls-group" id="balls1"></div>
+        <div class="balls-group" id="balls2"></div>
+      </div>
+    </div>
+  </div>
 
-<!-- PLACAR -->
-<div class="top-bar">
-<div class="team left" id="name1">JOGADOR 1</div>
+  <script>
+    const MODES = {
+      vazio: null,
+      par_impar: {
+        player1: [2, 4, 6, 8, 10, 12, 14],
+        player2: [3, 5, 7, 9, 11, 13, 15],
+        final: 1
+      },
+      bola_8: {
+        player1: [1, 2, 3, 4, 5, 6, 7],
+        player2: [9, 10, 11, 12, 13, 14, 15],
+        final: 8
+      }
+    };
 
-<div class="center-score">
-<div class="score-box" id="score1">0</div>
-<div class="x-divider">X</div>
-<div class="score-box" id="score2">0</div>
-</div>
+    function getBallClass(number) {
+      const map = {
+        1: "yellow",
+        2: "blue",
+        3: "red",
+        4: "purple",
+        5: "orange",
+        6: "green",
+        7: "brown",
+        8: "black",
+        9: "yellow",
+        10: "blue",
+        11: "red",
+        12: "purple",
+        13: "orange",
+        14: "green",
+        15: "wine"
+      };
+      return map[number] || "yellow";
+    }
 
-<div class="team right" id="name2">JOGADOR 2</div>
-</div>
+    function createBallHTML(number, player, isFinal = false) {
+      const cls = `${getBallClass(number)} ${isFinal ? "final-ball hidden" : "normal-ball"}`;
+      const id = isFinal ? `id="final${player}"` : "";
+      return `<div class="ball ${cls}" ${id}>${number}</div>`;
+    }
 
-<!-- BOLAS -->
-<div class="bottom-bar hidden" id="bottomBar">
-<div class="balls-group" id="balls1"></div>
-<div class="balls-group" id="balls2"></div>
-</div>
+    function updateClock() {
+      const now = new Date();
+      const time = now.toLocaleTimeString("pt-BR", {
+       hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+      });
+      const date = now.toLocaleDateString("pt-BR");
 
-</div>
-</div>
+ // FORMATO: DATA / HORA
+  document.getElementById("clockValue").innerText = `${date} / ${time}`;
 
-<script>
-function updateClock(){
-const now=new Date();
+  // não usa mais esse campo
+  document.getElementById("dateValue").innerText = "";
 
-const time=now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-const date=now.toLocaleDateString("pt-BR");
+     
+    }
 
-document.getElementById("clockValue").innerText=time;
-document.getElementById("dateValue").innerText=date;
+    function renderOverlayFromStorage() {
+      const mode = localStorage.getItem("mazitek_mode") || "vazio";
+      const conf = MODES[mode];
+      const bottomBar = document.getElementById("bottomBar");
+
+const showSeries = localStorage.getItem("mazitek_show_series");
+
+const seriesBar = document.querySelector(".series-bar");
+
+if (showSeries === "false") {
+  seriesBar.style.display = "none";
+} else {
+  seriesBar.style.display = "grid";
 }
 
-updateClock();
-setInterval(updateClock,1000);
-</script>
+      const name1 = localStorage.getItem("mazitek_name_1") || "JOGADOR 1";
+      const name2 = localStorage.getItem("mazitek_name_2") || "JOGADOR 2";
+      const seriesLabel = localStorage.getItem("mazitek_series_label") || "SÉRIES";
+      const city = localStorage.getItem("mazitek_city") || "SÃO PAULO";
 
-</body>
-</html>
+      document.getElementById("name1").innerText = name1;
+      document.getElementById("name2").innerText = name2;
+      document.getElementById("seriesLabel").innerText = seriesLabel;
+      document.getElementById("cityValue").innerText = city;
+
+      const scores = JSON.parse(localStorage.getItem("mazitek_scores") || '{"1":0,"2":0}');
+      const series = JSON.parse(localStorage.getItem("mazitek_series") || '{"1":0,"2":0}');
+
+      document.getElementById("score1").innerText = scores[1] ?? 0;
+      document.getElementById("score2").innerText = scores[2] ?? 0;
+      document.getElementById("series1").innerText = series[1] ?? 0;
+      document.getElementById("series2").innerText = series[2] ?? 0;
+
+      if (!conf) {
+        bottomBar.classList.add("hidden");
+        document.getElementById("balls1").innerHTML = "";
+        document.getElementById("balls2").innerHTML = "";
+        return;
+      }
+
+      bottomBar.classList.remove("hidden");
+
+      document.getElementById("balls1").innerHTML =
+        conf.player1.map(n => createBallHTML(n, 1)).join("") +
+        createBallHTML(conf.final, 1, true);
+
+      document.getElementById("balls2").innerHTML =
+        conf.player2.map(n => createBallHTML(n, 2)).join("") +
+        createBallHTML(conf.final, 2, true);
+
+      const savedBalls = JSON.parse(localStorage.getItem(`mazitek_ball_states_${mode}`) || '{}');
+
+      [1, 2].forEach(player => {
+        const balls = document.querySelectorAll(`#balls${player} .ball`);
+        balls.forEach(ball => {
+          const state = savedBalls[player]?.find(item =>
+            item.text === ball.innerText && item.isFinal === (ball.id === `final${player}`)
+          );
+          if (!state) return;
+
+          ball.classList.toggle("off", !!state.off);
+          ball.classList.toggle("hidden", !!state.hidden);
+        });
+      });
+    }
+
+    renderOverlayFromStorage();
+    updateClock();
+
+    window.addEventListener("storage", renderOverlayFromStorage);
+
+    setInterval(() => {
+      renderOverlayFromStorage();
+      updateClock();
+    }, 500);
+  </script>
+
+</body></html>
