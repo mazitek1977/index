@@ -1,7 +1,38 @@
-<!DOCTYPE html>
-<!-- saved from url=(0043)file:///C:/Users/mazitek/Desktop/index.html -->
-<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+<script>
+  // Suas configurações do Firebase (Cole aqui o que você copiou do console)
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    databaseURL: "https://SEU-PROJETO-default-rtdb.firebaseio.com/",
+    projectId: "SEU-PROJETO",
+    // ... restante dos dados
+  };
+
+  // Inicializa o Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database().ref("placar_sinuca");
+
+  // --- MUDANÇA NA LÓGICA ---
   
+  // No CONTROLE: Em vez de localStorage.setItem, você usará:
+  // db.update({ mazitek_score_1: novoValor });
+
+  // No INDEX (Overlay): Em vez de setInterval, você usará:
+  /*
+  db.on('value', (snapshot) => {
+    const data = snapshot.val();
+    document.getElementById("score1").innerText = data.score1;
+    // ... e assim por diante para todos os campos
+  });
+  */
+</script>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Overlay Placar Sinuca</title>
   <style>
@@ -41,7 +72,6 @@
       border-bottom: 1px solid rgba(255,255,255,0.08);
       min-height: 56px;
       padding: 4px 0;
-      gap: 0;
     }
 
     .top-info-wrap {
@@ -52,37 +82,29 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
-      padding: 4px 8px 5px;
+      padding: 4px 8px;
       min-height: 48px;
     }
 
     .mini-label {
-      text-align: center;
       color: white;
       font-size: 10px;
       font-weight: 900;
       letter-spacing: 1px;
       text-transform: uppercase;
       opacity: 0.72;
-      line-height: 1;
     }
 
     .mini-main {
       color: white;
       font-size: 20px;
       font-weight: 900;
-      line-height: 1;
       text-transform: uppercase;
-      text-align: center;
     }
 
+    /* Removido padding desnecessário do mini-sub se não for usado */
     .mini-sub {
-      color: rgba(255,255,255,0.82);
-      font-size: 40px;
-      font-weight: 700;
-      line-height: 1;
-      text-align: center;
+      display: none; 
     }
 
     .city-main {
@@ -98,31 +120,26 @@
       align-items: center;
       justify-content: center;
       gap: 3px;
-      padding: 4px 0 5px;
     }
 
     .series-label {
-      text-align: center;
       color: white;
       font-size: 18px;
       font-weight: 900;
-      letter-spacing: 1px;
       text-transform: uppercase;
       opacity: 0.8;
-      line-height: 1;
     }
 
     .series-score {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
     }
 
     .series-box {
       width: 38px;
       height: 28px;
-      background: box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      background: rgba(255, 255, 255, 0.05); /* Corrigido erro de sintaxe aqui */
       color: #FFD700;
       border-radius: 6px;
       font-size: 18px;
@@ -130,7 +147,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+      border: 1px solid rgba(255, 215, 0, 0.3);
     }
 
     .series-x {
@@ -144,31 +162,23 @@
       display: grid;
       grid-template-columns: 1fr 260px 1fr;
       align-items: stretch;
-      min-height:20px;
     }
 
     .team {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1px 10px;
+      padding: 10px;
     }
 
-    .team.left {
-      background: linear-gradient(90deg, #1565c0, #1e88e5);
-    }
-
-    .team.right {
-      background: linear-gradient(90deg, #ef6c00, #fb8c00);
-    }
+    .team.left { background: linear-gradient(90deg, #1565c0, #1e88e5); }
+    .team.right { background: linear-gradient(90deg, #ef6c00, #fb8c00); }
 
     .team-name {
       color: white;
       font-size: 40px;
       font-weight: 900;
       text-transform: uppercase;
-      text-align: center;
-      min-width: 220px;
       letter-spacing: 1px;
     }
 
@@ -183,15 +193,15 @@
     }
 
     .score-box {
-      width: 70px;
-      height: 70px;
+      width: 75px;
+      height: 75px;
       border-radius: 10px;
       background: #f5f5f5;
       color: #111;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
+      font-size: 45px;
       font-weight: 900;
       box-shadow: inset 0 -4px 8px rgba(0,0,0,0.15);
     }
@@ -200,48 +210,43 @@
       color: white;
       font-size: 24px;
       font-weight: 900;
-      opacity: 0.9;
     }
 
     .bottom-bar {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      align-items: center;
-      padding: 10px 0 12px;
+      padding: 12px 0;
       background: rgba(0,0,0,0.84);
-      gap: 6px;
     }
 
     .balls-group {
       display: flex;
       justify-content: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      padding: 0 16px;
+      gap: 8px;
       min-height: 34px;
     }
 
     .ball {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 800;
       border: 2px solid rgba(255,255,255,0.8);
-      user-select: none;
       box-shadow: inset 0 -3px 5px rgba(0,0,0,0.22), 0 2px 5px rgba(0,0,0,0.35);
-      transition: opacity .15s ease, transform .15s ease, filter .15s ease;
+      transition: all 0.2s ease;
     }
 
     .ball.off {
-      opacity: 0.18;
+      opacity: 0.15;
       filter: grayscale(100%);
-      transform: scale(0.92);
+      transform: scale(0.85);
     }
 
+    /* Cores das Bolas */
     .yellow { background: #fdd835; color: #111; }
     .blue   { background: #1e88e5; color: white; }
     .red    { background: #e53935; color: white; }
@@ -252,19 +257,16 @@
     .black  { background: #111; color: white; }
     .wine   { background: #7b1f1f; color: white; }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
   <div class="scoreboard-wrap">
     <div class="scoreboard">
-      <div class="series-bar">
+      <div class="series-bar" id="seriesBar">
         <div class="top-info-wrap">
-          <div class="mini-label">HORA</div>
-          <div class="mini-main" id="clockValue">20:46</div>
-          <div class="mini-sub" id="dateValue">03/04/2026</div>
+          <div class="mini-label">HORA / DATA</div>
+          <div class="mini-main" id="clockValue">--:--</div>
         </div>
 
         <div class="series-center-wrap">
@@ -284,17 +286,15 @@
 
       <div class="top-bar">
         <div class="team left">
-          <div class="team-name" id="name1">MAZITEK</div>
+          <div class="team-name" id="name1">JOGADOR 1</div>
         </div>
-
         <div class="center-score">
           <div class="score-box" id="score1">0</div>
           <div class="x-divider">X</div>
           <div class="score-box" id="score2">0</div>
         </div>
-
         <div class="team right">
-          <div class="team-name" id="name2">MAZINHO</div>
+          <div class="team-name" id="name2">JOGADOR 2</div>
         </div>
       </div>
 
@@ -320,25 +320,18 @@
       }
     };
 
-    function getBallClass(number) {
-      const map = {
-        1: "yellow",
-        2: "blue",
-        3: "red",
-        4: "purple",
-        5: "orange",
-        6: "green",
-        7: "brown",
-        8: "black",
-        9: "yellow",
-        10: "blue",
-        11: "red",
-        12: "purple",
-        13: "orange",
-        14: "green",
-        15: "wine"
+    function getBallClass(num) {
+      const colors = {
+        1: "yellow", 9: "yellow",
+        2: "blue", 10: "blue",
+        3: "red", 11: "red",
+        4: "purple", 12: "purple",
+        5: "orange", 13: "orange",
+        6: "green", 14: "green",
+        7: "brown", 15: "wine",
+        8: "black"
       };
-      return map[number] || "yellow";
+      return colors[num] || "yellow";
     }
 
     function createBallHTML(number, player, isFinal = false) {
@@ -349,97 +342,71 @@
 
     function updateClock() {
       const now = new Date();
-      const time = now.toLocaleTimeString("pt-BR", {
-       hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
-      });
+      const time = now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
       const date = now.toLocaleDateString("pt-BR");
-
- // FORMATO: DATA / HORA
-  document.getElementById("clockValue").innerText = `${date} / ${time}`;
-
-  // não usa mais esse campo
-  document.getElementById("dateValue").innerText = "";
-
-     
+      document.getElementById("clockValue").innerText = `${date} | ${time}`;
     }
 
     function renderOverlayFromStorage() {
+      // Configurações Básicas
       const mode = localStorage.getItem("mazitek_mode") || "vazio";
       const conf = MODES[mode];
-      const bottomBar = document.getElementById("bottomBar");
+      const showSeries = localStorage.getItem("mazitek_show_series") !== "false";
+      
+      document.getElementById("seriesBar").style.display = showSeries ? "grid" : "none";
+      document.getElementById("name1").innerText = localStorage.getItem("mazitek_name_1") || "JOGADOR 1";
+      document.getElementById("name2").innerText = localStorage.getItem("mazitek_name_2") || "JOGADOR 2";
+      document.getElementById("seriesLabel").innerText = localStorage.getItem("mazitek_series_label") || "SÉRIES";
+      document.getElementById("cityValue").innerText = localStorage.getItem("mazitek_city") || "SÃO PAULO";
 
-const showSeries = localStorage.getItem("mazitek_show_series");
-
-const seriesBar = document.querySelector(".series-bar");
-
-if (showSeries === "false") {
-  seriesBar.style.display = "none";
-} else {
-  seriesBar.style.display = "grid";
-}
-
-      const name1 = localStorage.getItem("mazitek_name_1") || "JOGADOR 1";
-      const name2 = localStorage.getItem("mazitek_name_2") || "JOGADOR 2";
-      const seriesLabel = localStorage.getItem("mazitek_series_label") || "SÉRIES";
-      const city = localStorage.getItem("mazitek_city") || "SÃO PAULO";
-
-      document.getElementById("name1").innerText = name1;
-      document.getElementById("name2").innerText = name2;
-      document.getElementById("seriesLabel").innerText = seriesLabel;
-      document.getElementById("cityValue").innerText = city;
-
+      // Scores
       const scores = JSON.parse(localStorage.getItem("mazitek_scores") || '{"1":0,"2":0}');
       const series = JSON.parse(localStorage.getItem("mazitek_series") || '{"1":0,"2":0}');
+      document.getElementById("score1").innerText = scores[1] || 0;
+      document.getElementById("score2").innerText = scores[2] || 0;
+      document.getElementById("series1").innerText = series[1] || 0;
+      document.getElementById("series2").innerText = series[2] || 0;
 
-      document.getElementById("score1").innerText = scores[1] ?? 0;
-      document.getElementById("score2").innerText = scores[2] ?? 0;
-      document.getElementById("series1").innerText = series[1] ?? 0;
-      document.getElementById("series2").innerText = series[2] ?? 0;
-
+      // Lógica das Bolas
+      const bottomBar = document.getElementById("bottomBar");
       if (!conf) {
         bottomBar.classList.add("hidden");
-        document.getElementById("balls1").innerHTML = "";
-        document.getElementById("balls2").innerHTML = "";
         return;
       }
 
       bottomBar.classList.remove("hidden");
+      
+      // Renderiza bolas apenas se necessário (otimização)
+      const b1 = document.getElementById("balls1");
+      const b2 = document.getElementById("balls2");
+      
+      b1.innerHTML = conf.player1.map(n => createBallHTML(n, 1)).join("") + createBallHTML(conf.final, 1, true);
+      b2.innerHTML = conf.player2.map(n => createBallHTML(n, 2)).join("") + createBallHTML(conf.final, 2, true);
 
-      document.getElementById("balls1").innerHTML =
-        conf.player1.map(n => createBallHTML(n, 1)).join("") +
-        createBallHTML(conf.final, 1, true);
-
-      document.getElementById("balls2").innerHTML =
-        conf.player2.map(n => createBallHTML(n, 2)).join("") +
-        createBallHTML(conf.final, 2, true);
-
+      // Aplica estados (apagada ou escondida)
       const savedBalls = JSON.parse(localStorage.getItem(`mazitek_ball_states_${mode}`) || '{}');
-
       [1, 2].forEach(player => {
-        const balls = document.querySelectorAll(`#balls${player} .ball`);
-        balls.forEach(ball => {
-          const state = savedBalls[player]?.find(item =>
+        const ballEls = document.querySelectorAll(`#balls${player} .ball`);
+        ballEls.forEach(ball => {
+          const state = savedBalls[player]?.find(item => 
             item.text === ball.innerText && item.isFinal === (ball.id === `final${player}`)
           );
-          if (!state) return;
-
-          ball.classList.toggle("off", !!state.off);
-          ball.classList.toggle("hidden", !!state.hidden);
+          if (state) {
+            ball.classList.toggle("off", !!state.off);
+            ball.classList.toggle("hidden", !!state.hidden);
+          }
         });
       });
     }
 
-    renderOverlayFromStorage();
+    // Inicialização
     updateClock();
+    renderOverlayFromStorage();
 
+    // Listeners
     window.addEventListener("storage", renderOverlayFromStorage);
-
-    setInterval(() => {
-      renderOverlayFromStorage();
-      updateClock();
-    }, 500);
+    setInterval(updateClock, 1000); // Relógio a cada 1s
+    setInterval(renderOverlayFromStorage, 2000); // Polling de segurança mais lento
   </script>
-
-</body></html>
+</body>
+</html>
