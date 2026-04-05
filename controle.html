@@ -1,23 +1,45 @@
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+<script>
+  // Suas configurações do Firebase (Cole aqui o que você copiou do console)
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    databaseURL: "https://SEU-PROJETO-default-rtdb.firebaseio.com/",
+    projectId: "SEU-PROJETO",
+    // ... restante dos dados
+  };
+
+  // Inicializa o Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database().ref("placar_sinuca");
+
+  // --- MUDANÇA NA LÓGICA ---
+  
+  // No CONTROLE: Em vez de localStorage.setItem, você usará:
+  // db.update({ mazitek_score_1: novoValor });
+
+  // No INDEX (Overlay): Em vez de setInterval, você usará:
+  /*
+  db.on('value', (snapshot) => {
+    const data = snapshot.val();
+    document.getElementById("score1").innerText = data.score1;
+    // ... e assim por diante para todos os campos
+  });
+  */
+</script>
+
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle do Placar</title>
+  <title>Controle do Placar - Mazitek</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background: #111;
-      color: white;
-      font-family: Arial, Helvetica, sans-serif;
-      padding: 20px;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111; color: white; font-family: Arial, Helvetica, sans-serif; padding: 20px; }
     .panel {
       max-width: 1100px;
       margin: 0 auto;
@@ -28,67 +50,28 @@
       display: grid;
       gap: 14px;
     }
-
     .control-row {
       display: grid;
       grid-template-columns: 170px 1fr;
       gap: 12px;
       align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-
-    .control-label {
-      font-size: 14px;
-      font-weight: 900;
-      text-transform: uppercase;
-      opacity: .9;
-    }
-
-    .control-box {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    input, select, button {
-      height: 42px;
-      border-radius: 10px;
-      border: none;
-      font-weight: 900;
-    }
-
-    input, select {
-      background: #1b1b1b;
-      color: white;
-      border: 1px solid rgba(255,255,255,0.12);
-      padding: 0 12px;
-      min-width: 160px;
-    }
-
-    button {
-      color: white;
-      padding: 0 14px;
-      cursor: pointer;
-    }
-
+    .control-label { font-size: 14px; font-weight: 900; text-transform: uppercase; opacity: .9; }
+    .control-box { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    input, select, button { height: 42px; border-radius: 10px; border: none; font-weight: 900; }
+    input, select { background: #1b1b1b; color: white; border: 1px solid rgba(255,255,255,0.12); padding: 0 12px; min-width: 160px; }
+    button { color: white; padding: 0 14px; cursor: pointer; transition: opacity 0.2s; }
+    button:active { opacity: 0.7; }
     .btn-red { background: #c62828; }
     .btn-green { background: #2e7d32; }
     .btn-blue { background: #1565c0; }
     .btn-gray { background: #455a64; }
     .btn-orange { background: #ef6c00; }
-
-    .ball-control-btn {
-      min-width: 48px;
-    }
-
-    .ball-control-btn.off {
-      opacity: 0.45;
-      filter: grayscale(100%);
-    }
-
-    .ball-control-btn.final-control {
-      border: 2px solid rgba(255,255,255,0.35);
-    }
+    .ball-control-btn { min-width: 48px; }
+    .ball-control-btn.off { opacity: 0.35; filter: grayscale(100%); }
+    .ball-control-btn.final-control { border: 2px solid rgba(255,255,255,0.35); }
   </style>
 </head>
 <body>
@@ -98,7 +81,6 @@
       <div class="control-box">
         <input id="inputName1" placeholder="Jogador 1" />
         <button class="btn-blue" onclick="updateName(1)">OK J1</button>
-
         <input id="inputName2" placeholder="Jogador 2" />
         <button class="btn-orange" onclick="updateName(2)">OK J2</button>
       </div>
@@ -129,25 +111,22 @@
       <div class="control-box">
         <input id="inputSeriesLabel" placeholder="Texto da série" />
         <button class="btn-blue" onclick="updateSeriesLabel()">OK Texto</button>
-        <button class="btn-red" onclick="changeSeries(1,-1)">➖</button>
-        <button class="btn-green" onclick="changeSeries(1,1)">➕</button>
-        <button class="btn-red" onclick="changeSeries(2,-1)">➖</button>
-        <button class="btn-green" onclick="changeSeries(2,1)">➕</button>
+        <button class="btn-red" onclick="changeSeries(1,-1)">➖ J1</button>
+        <button class="btn-green" onclick="changeSeries(1,1)">➕ J1</button>
+        <button class="btn-red" onclick="changeSeries(2,-1)">➖ J2</button>
+        <button class="btn-green" onclick="changeSeries(2,1)">➕ J2</button>
         <button class="btn-gray" onclick="resetSeries()">Reset Série</button>
-<div class="control-row">
-  <div class="control-label">Série</div>
-  <div class="control-box">
-    <button class="btn-blue" onclick="toggleSeries()">MOSTRAR / OCULTAR</button>
+        <button class="btn-blue" onclick="toggleSeries()">MOSTRAR / OCULTAR</button>
       </div>
     </div>
 
     <div class="control-row">
       <div class="control-label">Placar</div>
       <div class="control-box">
-        <button class="btn-red" onclick="changeScore(1,-1)">➖</button>
-        <button class="btn-green" onclick="changeScore(1,1)">➕</button>
-        <button class="btn-red" onclick="changeScore(2,-1)">➖</button>
-        <button class="btn-green" onclick="changeScore(2,1)">➕</button>
+        <button class="btn-red" onclick="changeScore(1,-1)">➖ J1</button>
+        <button class="btn-green" onclick="changeScore(1,1)">➕ J1</button>
+        <button class="btn-red" onclick="changeScore(2,-1)">➖ J2</button>
+        <button class="btn-green" onclick="changeScore(2,1)">➕ J2</button>
         <button class="btn-gray" onclick="resetScore()">Reset Score</button>
       </div>
     </div>
@@ -156,16 +135,15 @@
       <div class="control-label">Bolas J1</div>
       <div class="control-box" id="ballControls1"></div>
     </div>
-
     <div class="control-row">
       <div class="control-label">Bolas J2</div>
       <div class="control-box" id="ballControls2"></div>
     </div>
 
     <div class="control-row">
-      <div class="control-label">Reset</div>
+      <div class="control-label">Ações</div>
       <div class="control-box">
-        <button class="btn-gray" onclick="resetBallsOnly()">Reset Bolas</button>
+        <button class="btn-gray" onclick="resetBallsOnly()">Reset Apenas Bolas</button>
       </div>
     </div>
   </div>
@@ -173,16 +151,8 @@
   <script>
     const MODES = {
       vazio: null,
-      par_impar: {
-        player1: [2, 4, 6, 8, 10, 12, 14],
-        player2: [3, 5, 7, 9, 11, 13, 15],
-        final: 1
-      },
-      bola_8: {
-        player1: [1, 2, 3, 4, 5, 6, 7],
-        player2: [9, 10, 11, 12, 13, 14, 15],
-        final: 8
-      }
+      par_impar: { player1: [2, 4, 6, 8, 10, 12, 14], player2: [3, 5, 7, 9, 11, 13, 15], final: 1 },
+      bola_8: { player1: [1, 2, 3, 4, 5, 6, 7], player2: [9, 10, 11, 12, 13, 14, 15], final: 8 }
     };
 
     let currentMode = localStorage.getItem("mazitek_mode") || "vazio";
@@ -194,276 +164,150 @@
       if (!localStorage.getItem("mazitek_name_2")) localStorage.setItem("mazitek_name_2", "JOGADOR 2");
       if (!localStorage.getItem("mazitek_series_label")) localStorage.setItem("mazitek_series_label", "SÉRIES");
       if (!localStorage.getItem("mazitek_city")) localStorage.setItem("mazitek_city", "SÃO PAULO");
-      if (!localStorage.getItem("mazitek_mode")) localStorage.setItem("mazitek_mode", currentMode);
-      if (!localStorage.getItem("mazitek_scores")) localStorage.setItem("mazitek_scores", JSON.stringify(scores));
-      if (!localStorage.getItem("mazitek_series")) localStorage.setItem("mazitek_series", JSON.stringify(series));
-      if (!localStorage.getItem("mazitek_show_series")) { localStorage.setItem("mazitek_show_series", "true");}
+      if (!localStorage.getItem("mazitek_show_series")) localStorage.setItem("mazitek_show_series", "true");
     }
 
-    function saveScores() {
-      localStorage.setItem("mazitek_scores", JSON.stringify(scores));
-    }
+    function saveScores() { localStorage.setItem("mazitek_scores", JSON.stringify(scores)); }
+    function saveSeries() { localStorage.setItem("mazitek_series", JSON.stringify(series)); }
 
-    function saveSeries() {
-      localStorage.setItem("mazitek_series", JSON.stringify(series));
-    }
-
-function resetScore() {
-  scores = { 1: 0, 2: 0 };
-  localStorage.setItem("mazitek_scores", JSON.stringify(scores));
-}    
-
-function ensureBallStateForMode() {
-      if (currentMode === "vazio") return;
-
-      const key = `mazitek_ball_states_${currentMode}`;
-      if (localStorage.getItem(key)) return;
-
-      const mode = MODES[currentMode];
-      const state = { 1: [], 2: [] };
-
-      mode.player1.forEach(n => state[1].push({ text: String(n), off: false, hidden: false, isFinal: false }));
-      state[1].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
-
-      mode.player2.forEach(n => state[2].push({ text: String(n), off: false, hidden: false, isFinal: false }));
-      state[2].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
-
-      localStorage.setItem(key, JSON.stringify(state));
-    }
-
-    function getBallStates() {
-      if (currentMode === "vazio") return { 1: [], 2: [] };
-      ensureBallStateForMode();
-      return JSON.parse(localStorage.getItem(`mazitek_ball_states_${currentMode}`));
-    }
-
-    function setBallStates(state) {
-      if (currentMode === "vazio") return;
-      localStorage.setItem(`mazitek_ball_states_${currentMode}`, JSON.stringify(state));
-    }
-
-    function updateName(player) {
-      const input = document.getElementById("inputName" + player);
-      const name = input.value.trim();
-      if (!name) return;
-
-      localStorage.setItem(`mazitek_name_${player}`, name.toUpperCase());
-      input.value = "";
-      input.placeholder = name.toUpperCase();
+    function updateName(p) {
+      const el = document.getElementById("inputName" + p);
+      if (el.value) {
+        localStorage.setItem("mazitek_name_" + p, el.value.toUpperCase());
+        el.placeholder = el.value.toUpperCase();
+        el.value = "";
+      }
     }
 
     function updateCity() {
-      const input = document.getElementById("inputCity");
-      const city = input.value.trim();
-      if (!city) return;
-
-      localStorage.setItem("mazitek_city", city.toUpperCase());
-      input.value = "";
-      input.placeholder = city.toUpperCase();
+      const el = document.getElementById("inputCity");
+      if (el.value) {
+        localStorage.setItem("mazitek_city", el.value.toUpperCase());
+        el.placeholder = el.value.toUpperCase();
+        el.value = "";
+      }
     }
 
     function updateSeriesLabel() {
-      const input = document.getElementById("inputSeriesLabel");
-      const text = input.value.trim();
-      if (!text) return;
-
-      localStorage.setItem("mazitek_series_label", text.toUpperCase());
-      input.value = "";
-      input.placeholder = text.toUpperCase();
+      const el = document.getElementById("inputSeriesLabel");
+      if (el.value) {
+        localStorage.setItem("mazitek_series_label", el.value.toUpperCase());
+        el.placeholder = el.value.toUpperCase();
+        el.value = "";
+      }
     }
 
-    function changeScore(player, value) {
-      scores[player] += value;
-      if (scores[player] < 0) scores[player] = 0;
-      saveScores();
+    function toggleSeries() {
+      const current = localStorage.getItem("mazitek_show_series") === "true";
+      localStorage.setItem("mazitek_show_series", !current);
+      alert("Exibição da série: " + (!current ? "LIGADO" : "DESLIGADO"));
     }
 
-    function changeSeries(player, value) {
-      series[player] += value;
-      if (series[player] < 0) series[player] = 0;
-      saveSeries();
-    }
-
-    function resetSeries() {
-      series = { 1: 0, 2: 0 };
-      saveSeries();
-    }
-
-    function updateFinalVisibility(state, player) {
-      const normal = state[player].filter(item => !item.isFinal);
-      const final = state[player].find(item => item.isFinal);
-      const allOff = normal.every(item => item.off);
-
-      final.hidden = !allOff;
-      if (final.hidden) final.off = false;
-    }
-
-    function toggleSpecificBall(player, number) {
-      if (currentMode === "vazio") return;
-
-      const state = getBallStates();
-      const item = state[player].find(ball => !ball.isFinal && ball.text === String(number));
-      if (!item) return;
-
-      item.off = !item.off;
-      updateFinalVisibility(state, player);
-      setBallStates(state);
-      syncBallControlButtons();
-    }
-
-    function toggleSpecificFinalBall(player) {
-      if (currentMode === "vazio") return;
-
-      const state = getBallStates();
-      const item = state[player].find(ball => ball.isFinal);
-      if (!item || item.hidden) return;
-
-      item.off = !item.off;
-      setBallStates(state);
-      syncBallControlButtons();
-    }
-
-    function resetBallsOnly() {
-      if (currentMode === "vazio") return;
-
-      const mode = MODES[currentMode];
-      const state = { 1: [], 2: [] };
-
-      mode.player1.forEach(n => state[1].push({ text: String(n), off: false, hidden: false, isFinal: false }));
-      state[1].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
-
-      mode.player2.forEach(n => state[2].push({ text: String(n), off: false, hidden: false, isFinal: false }));
-      state[2].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
-
-      setBallStates(state);
-      syncBallControlButtons();
-    }
-
-    function renderBallControls() {
-      const container1 = document.getElementById("ballControls1");
-      const container2 = document.getElementById("ballControls2");
-
-      container1.innerHTML = "";
-      container2.innerHTML = "";
-
-      if (currentMode === "vazio") return;
-
-      const mode = MODES[currentMode];
-
-      mode.player1.forEach(number => {
-        const btn = document.createElement("button");
-        btn.className = `ball-control-btn btn-blue ball-btn-player1 ball-btn-${number}`;
-        btn.innerText = number;
-        btn.onclick = () => toggleSpecificBall(1, number);
-        container1.appendChild(btn);
-      });
-
-      const finalBtn1 = document.createElement("button");
-      finalBtn1.className = "ball-control-btn final-control btn-gray final-btn-player1";
-      finalBtn1.innerText = `Final ${mode.final}`;
-      finalBtn1.onclick = () => toggleSpecificFinalBall(1);
-      container1.appendChild(finalBtn1);
-
-      mode.player2.forEach(number => {
-        const btn = document.createElement("button");
-        btn.className = `ball-control-btn btn-orange ball-btn-player2 ball-btn-${number}`;
-        btn.innerText = number;
-        btn.onclick = () => toggleSpecificBall(2, number);
-        container2.appendChild(btn);
-      });
-
-      const finalBtn2 = document.createElement("button");
-      finalBtn2.className = "ball-control-btn final-control btn-gray final-btn-player2";
-      finalBtn2.innerText = `Final ${mode.final}`;
-      finalBtn2.onclick = () => toggleSpecificFinalBall(2);
-      container2.appendChild(finalBtn2);
-
-      syncBallControlButtons();
-    }
-
-    function syncBallControlButtons() {
-      if (currentMode === "vazio") return;
-
-      const state = getBallStates();
-
-      [1, 2].forEach(player => {
-        state[player].forEach(item => {
-          if (item.isFinal) return;
-          const btn = document.querySelector(`.ball-btn-player${player}.ball-btn-${item.text}`);
-          if (btn) btn.classList.toggle("off", item.off);
-        });
-
-        const final = state[player].find(item => item.isFinal);
-        const finalBtn = document.querySelector(`.final-btn-player${player}`);
-        if (finalBtn && final) {
-          finalBtn.classList.toggle("off", final.off);
-          finalBtn.disabled = final.hidden;
-          finalBtn.style.opacity = final.hidden ? "0.35" : "";
-          finalBtn.style.cursor = final.hidden ? "not-allowed" : "pointer";
-        }
-      });
-    }
+    function changeScore(p, v) { scores[p] = Math.max(0, scores[p] + v); saveScores(); }
+    function changeSeries(p, v) { series[p] = Math.max(0, series[p] + v); saveSeries(); }
+    function resetScore() { scores = {1:0, 2:0}; saveScores(); }
+    function resetSeries() { series = {1:0, 2:0}; saveSeries(); }
 
     function changeMode(mode) {
       currentMode = mode;
-      scores = { 1: 0, 2: 0 };
-      localStorage.setItem("mazitek_mode", currentMode);
-      saveScores();
+      localStorage.setItem("mazitek_mode", mode);
+      resetScore();
+      if (mode !== "vazio") resetBallsOnly();
+      renderBallControls();
+    }
 
-      if (currentMode !== "vazio") {
-        resetBallsOnly();
+    function getBallStates() {
+      const key = `mazitek_ball_states_${currentMode}`;
+      return JSON.parse(localStorage.getItem(key)) || {1:[], 2:[]};
+    }
+
+    function setBallStates(state) {
+      localStorage.setItem(`mazitek_ball_states_${currentMode}`, JSON.stringify(state));
+    }
+
+    function renderBallControls() {
+      const c1 = document.getElementById("ballControls1");
+      const c2 = document.getElementById("ballControls2");
+      c1.innerHTML = ""; c2.innerHTML = "";
+      if (currentMode === "vazio") return;
+
+      const mode = MODES[currentMode];
+      const createBtn = (n, p, isFinal) => {
+        const btn = document.createElement("button");
+        btn.className = `ball-control-btn ${p===1?'btn-blue':'btn-orange'} ball-p${p} ${isFinal?'final-control':''}`;
+        btn.id = `btn-p${p}-${n}${isFinal?'-f':''}`;
+        btn.innerText = isFinal ? "F" : n;
+        btn.onclick = () => isFinal ? toggleSpecificFinalBall(p) : toggleSpecificBall(p, n);
+        return btn;
+      };
+
+      mode.player1.forEach(n => c1.appendChild(createBtn(n, 1, false)));
+      c1.appendChild(createBtn(mode.final, 1, true));
+      mode.player2.forEach(n => c2.appendChild(createBtn(n, 2, false)));
+      c2.appendChild(createBtn(mode.final, 2, true));
+      syncBallControlButtons();
+    }
+
+    function toggleSpecificBall(p, n) {
+      const state = getBallStates();
+      const ball = state[p].find(b => b.text == n && !b.isFinal);
+      if (ball) {
+        ball.off = !ball.off;
+        const allNormalOff = state[p].filter(b => !b.isFinal).every(b => b.off);
+        const final = state[p].find(b => b.isFinal);
+        final.hidden = !allNormalOff;
+        if (final.hidden) final.off = false;
+        setBallStates(state);
+        syncBallControlButtons();
       }
+    }
 
+    function toggleSpecificFinalBall(p) {
+      const state = getBallStates();
+      const final = state[p].find(b => b.isFinal);
+      if (final && !final.hidden) {
+        final.off = !final.off;
+        setBallStates(state);
+        syncBallControlButtons();
+      }
+    }
+
+    function syncBallControlButtons() {
+      const state = getBallStates();
+      [1, 2].forEach(p => {
+        state[p].forEach(b => {
+          const btn = document.getElementById(`btn-p${p}-${b.text}${b.isFinal?'-f':''}`);
+          if (btn) {
+            btn.classList.toggle("off", b.off);
+            if (b.isFinal) {
+              btn.style.display = b.hidden ? "none" : "block";
+            }
+          }
+        });
+      });
+    }
+
+    function resetBallsOnly() {
+      const mode = MODES[currentMode];
+      if (!mode) return;
+      const state = { 1: [], 2: [] };
+      [1, 2].forEach(p => {
+        const nums = p === 1 ? mode.player1 : mode.player2;
+        nums.forEach(n => state[p].push({ text: String(n), off: false, hidden: false, isFinal: false }));
+        state[p].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
+      });
+      setBallStates(state);
       renderBallControls();
     }
 
     function resetAll() {
-      scores = { 1: 0, 2: 0 };
-      series = { 1: 0, 2: 0 };
-      saveScores();
-      saveSeries();
-
-      if (currentMode !== "vazio") {
-        resetBallsOnly();
-      } else {
-        renderBallControls();
+      if (confirm("Resetar tudo?")) {
+        resetScore(); resetSeries(); resetBallsOnly();
       }
     }
 
-    function loadControlState() {
-      initDefaults();
-      document.getElementById("modeSelect").value = currentMode;
-
-      const savedName1 = localStorage.getItem("mazitek_name_1");
-      const savedName2 = localStorage.getItem("mazitek_name_2");
-      const savedSeriesLabel = localStorage.getItem("mazitek_series_label");
-      const savedCity = localStorage.getItem("mazitek_city");
-
-      if (savedName1) document.getElementById("inputName1").placeholder = savedName1;
-      if (savedName2) document.getElementById("inputName2").placeholder = savedName2;
-      if (savedSeriesLabel) document.getElementById("inputSeriesLabel").placeholder = savedSeriesLabel;
-      if (savedCity) document.getElementById("inputCity").placeholder = savedCity;
-
-      renderBallControls();
-    }
-
-    document.getElementById("inputName1").addEventListener("keydown", e => {
-      if (e.key === "Enter") updateName(1);
-    });
-
-    document.getElementById("inputName2").addEventListener("keydown", e => {
-      if (e.key === "Enter") updateName(2);
-    });
-
-    document.getElementById("inputSeriesLabel").addEventListener("keydown", e => {
-      if (e.key === "Enter") updateSeriesLabel();
-    });
-
-    document.getElementById("inputCity").addEventListener("keydown", e => {
-      if (e.key === "Enter") updateCity();
-    });
-
-    loadControlState();
+    initDefaults();
+    renderBallControls();
   </script>
 </body>
 </html>
