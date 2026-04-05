@@ -1,100 +1,84 @@
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyDkVarSOtaIusIhQejf5FwgBDeDnc7u8hc",
+  authDomain: "score-60763.firebaseapp.com",
+  databaseURL: "https://score-60763-default-rtdb.firebaseio.com",
+  projectId: "score-60763",
+  storageBucket: "score-60763.firebasestorage.app",
+  messagingSenderId: "626744722234",
+  appId: "1:626744722234:web:d052dae8dc66f14dcb0603",
+  measurementId: "G-3BK4SGXEPP"
+};
+
+  // Inicializa o Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database().ref("placar_sinuca");
+
+  // --- MUDANÇA NA LÓGICA ---
+  
+  // No CONTROLE: Em vez de localStorage.setItem, você usará:
+  // db.update({ mazitek_score_1: novoValor });
+
+  // No INDEX (Overlay): Em vez de setInterval, você usará:
+  /*
+  db.on('value', (snapshot) => {
+    const data = snapshot.val();
+    document.getElementById("score1").innerText = data.score1;
+    // ... e assim por diante para todos os campos
+  });
+  */
+</script>
+
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle do Placar - Mazitek</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #111; color: white; font-family: Arial, Helvetica, sans-serif; padding: 16px; }
+    body { background: #111; color: white; font-family: Arial, Helvetica, sans-serif; padding: 20px; }
     .panel {
-      max-width: 800px;
+      max-width: 1100px;
       margin: 0 auto;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 16px;
       padding: 16px;
-      display: flex;
-      flex-direction: column;
+      display: grid;
       gap: 14px;
     }
     .control-row {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 12px;
+      align-items: center;
       padding-bottom: 10px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    .control-label { 
-      font-size: 14px; 
-      font-weight: 900; 
-      text-transform: uppercase; 
-      opacity: .9;
-      margin-bottom: 4px;
-    }
-    .control-box { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 8px; 
-      align-items: center;
-    }
-    input, select, button { 
-      height: 44px; 
-      border-radius: 10px; 
-      border: none; 
-      font-weight: 900;
-      font-size: 16px;
-    }
-    input, select { 
-      background: #1b1b1b; 
-      color: white; 
-      border: 1px solid rgba(255,255,255,0.12); 
-      padding: 0 12px; 
-      flex: 1;
-      min-width: 120px;
-    }
-    button { 
-      color: white; 
-      padding: 0 16px; 
-      cursor: pointer; 
-      transition: opacity 0.2s;
-      min-width: 60px;
-    }
+    .control-label { font-size: 14px; font-weight: 900; text-transform: uppercase; opacity: .9; }
+    .control-box { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    input, select, button { height: 42px; border-radius: 10px; border: none; font-weight: 900; }
+    input, select { background: #1b1b1b; color: white; border: 1px solid rgba(255,255,255,0.12); padding: 0 12px; min-width: 160px; }
+    button { color: white; padding: 0 14px; cursor: pointer; transition: opacity 0.2s; }
     button:active { opacity: 0.7; }
     .btn-red { background: #c62828; }
     .btn-green { background: #2e7d32; }
     .btn-blue { background: #1565c0; }
     .btn-gray { background: #455a64; }
     .btn-orange { background: #ef6c00; }
-    .ball-control-btn { 
-      min-width: 48px; 
-      height: 48px;
-      font-size: 18px;
-    }
+    .ball-control-btn { min-width: 48px; }
     .ball-control-btn.off { opacity: 0.35; filter: grayscale(100%); }
     .ball-control-btn.final-control { border: 2px solid rgba(255,255,255,0.35); }
-    
-    /* Status do Firebase */
-    .firebase-status {
-      background: #1a1a2e;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .status-online { color: #4caf50; }
-    .status-offline { color: #f44336; }
   </style>
 </head>
 <body>
   <div class="panel">
-    <!-- Status do Firebase -->
-    <div class="firebase-status" id="firebaseStatus">
-      🔌 Conectando ao Firebase...
-    </div>
-
     <div class="control-row">
       <div class="control-label">Nomes</div>
       <div class="control-box">
@@ -130,16 +114,12 @@
       <div class="control-box">
         <input id="inputSeriesLabel" placeholder="Texto da série" />
         <button class="btn-blue" onclick="updateSeriesLabel()">OK Texto</button>
-      </div>
-      <div class="control-box">
-        <button class="btn-red" onclick="changeSeries(1,-1)">➖ Série J1</button>
-        <button class="btn-green" onclick="changeSeries(1,1)">➕ Série J1</button>
-        <button class="btn-red" onclick="changeSeries(2,-1)">➖ Série J2</button>
-        <button class="btn-green" onclick="changeSeries(2,1)">➕ Série J2</button>
-      </div>
-      <div class="control-box">
+        <button class="btn-red" onclick="changeSeries(1,-1)">➖ J1</button>
+        <button class="btn-green" onclick="changeSeries(1,1)">➕ J1</button>
+        <button class="btn-red" onclick="changeSeries(2,-1)">➖ J2</button>
+        <button class="btn-green" onclick="changeSeries(2,1)">➕ J2</button>
         <button class="btn-gray" onclick="resetSeries()">Reset Série</button>
-        <button class="btn-blue" onclick="toggleSeries()">Mostrar/Ocultar</button>
+        <button class="btn-blue" onclick="toggleSeries()">MOSTRAR / OCULTAR</button>
       </div>
     </div>
 
@@ -171,105 +151,33 @@
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
-
   <script>
-    // ============================================================
-    // 🔥 CONFIGURAÇÃO DO FIREBASE - COLE SEUS DADOS AQUI! 🔥
-    // ============================================================
-    const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU-PROJETO.firebaseapp.com",
-      databaseURL: "https://SEU-PROJETO-default-rtdb.firebaseio.com/",
-      projectId: "SEU-PROJETO",
-      storageBucket: "SEU-PROJETO.appspot.com",
-      messagingSenderId: "SEU_SENDER_ID",
-      appId: "SEU_APP_ID"
-    };
-    // ============================================================
-
-    // Inicializa Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database().ref("placar_sinuca");
-
-    // Variável de controle de status
-    let isFirebaseConnected = false;
-    let currentMode = "vazio";
-
-    // Estrutura de dados das modalidades
     const MODES = {
       vazio: null,
       par_impar: { player1: [2, 4, 6, 8, 10, 12, 14], player2: [3, 5, 7, 9, 11, 13, 15], final: 1 },
       bola_8: { player1: [1, 2, 3, 4, 5, 6, 7], player2: [9, 10, 11, 12, 13, 14, 15], final: 8 }
     };
 
-    // ==================== FUNÇÕES DE SINCRONIZAÇÃO ====================
-    async function syncToFirebase(path, value) {
-      if (!isFirebaseConnected) {
-        console.warn("Firebase não conectado, salvando localmente apenas");
-        return;
-      }
-      try {
-        await db.child(path).set(value);
-        updateStatus(true);
-      } catch (error) {
-        console.error("Erro ao sincronizar:", error);
-        updateStatus(false);
-      }
+    let currentMode = localStorage.getItem("mazitek_mode") || "vazio";
+    let scores = JSON.parse(localStorage.getItem("mazitek_scores") || '{"1":0,"2":0}');
+    let series = JSON.parse(localStorage.getItem("mazitek_series") || '{"1":0,"2":0}');
+
+    function initDefaults() {
+      if (!localStorage.getItem("mazitek_name_1")) localStorage.setItem("mazitek_name_1", "JOGADOR 1");
+      if (!localStorage.getItem("mazitek_name_2")) localStorage.setItem("mazitek_name_2", "JOGADOR 2");
+      if (!localStorage.getItem("mazitek_series_label")) localStorage.setItem("mazitek_series_label", "SÉRIES");
+      if (!localStorage.getItem("mazitek_city")) localStorage.setItem("mazitek_city", "SÃO PAULO");
+      if (!localStorage.getItem("mazitek_show_series")) localStorage.setItem("mazitek_show_series", "true");
     }
 
-    async function syncObjectToFirebase(obj) {
-      if (!isFirebaseConnected) return;
-      try {
-        await db.update(obj);
-        updateStatus(true);
-      } catch (error) {
-        console.error("Erro ao sincronizar objeto:", error);
-        updateStatus(false);
-      }
-    }
+    function saveScores() { localStorage.setItem("mazitek_scores", JSON.stringify(scores)); }
+    function saveSeries() { localStorage.setItem("mazitek_series", JSON.stringify(series)); }
 
-    function updateStatus(connected) {
-      isFirebaseConnected = connected;
-      const statusDiv = document.getElementById("firebaseStatus");
-      if (connected) {
-        statusDiv.innerHTML = '✅ Conectado ao Firebase - Sincronização em tempo real';
-        statusDiv.style.background = '#0a2e1a';
-      } else {
-        statusDiv.innerHTML = '⚠️ Sem conexão com Firebase - Dados salvos localmente';
-        statusDiv.style.background = '#2e1a1a';
-      }
-    }
-
-    // ==================== FUNÇÕES DE LEITURA/ESCRITA ====================
-    async function saveData(key, value) {
-      localStorage.setItem(key, value);
-      await syncToFirebase(key, value);
-    }
-
-    async function saveJSON(key, value) {
-      const jsonStr = JSON.stringify(value);
-      localStorage.setItem(key, jsonStr);
-      await syncToFirebase(key, jsonStr);
-    }
-
-    function loadData(key, defaultValue) {
-      return localStorage.getItem(key) || defaultValue;
-    }
-
-    function loadJSON(key, defaultValue) {
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : defaultValue;
-    }
-
-    // ==================== FUNÇÕES PRINCIPAIS ====================
     function updateName(p) {
       const el = document.getElementById("inputName" + p);
       if (el.value) {
-        const value = el.value.toUpperCase();
-        saveData("mazitek_name_" + p, value);
-        el.placeholder = value;
+        localStorage.setItem("mazitek_name_" + p, el.value.toUpperCase());
+        el.placeholder = el.value.toUpperCase();
         el.value = "";
       }
     }
@@ -277,9 +185,8 @@
     function updateCity() {
       const el = document.getElementById("inputCity");
       if (el.value) {
-        const value = el.value.toUpperCase();
-        saveData("mazitek_city", value);
-        el.placeholder = value;
+        localStorage.setItem("mazitek_city", el.value.toUpperCase());
+        el.placeholder = el.value.toUpperCase();
         el.value = "";
       }
     }
@@ -287,54 +194,38 @@
     function updateSeriesLabel() {
       const el = document.getElementById("inputSeriesLabel");
       if (el.value) {
-        const value = el.value.toUpperCase();
-        saveData("mazitek_series_label", value);
-        el.placeholder = value;
+        localStorage.setItem("mazitek_series_label", el.value.toUpperCase());
+        el.placeholder = el.value.toUpperCase();
         el.value = "";
       }
     }
 
     function toggleSeries() {
-      const current = loadData("mazitek_show_series", "true") === "true";
-      saveData("mazitek_show_series", !current);
+      const current = localStorage.getItem("mazitek_show_series") === "true";
+      localStorage.setItem("mazitek_show_series", !current);
       alert("Exibição da série: " + (!current ? "LIGADO" : "DESLIGADO"));
     }
 
-    async function changeScore(p, v) {
-      let scores = loadJSON("mazitek_scores", {"1":0,"2":0});
-      scores[p] = Math.max(0, scores[p] + v);
-      await saveJSON("mazitek_scores", scores);
-    }
+    function changeScore(p, v) { scores[p] = Math.max(0, scores[p] + v); saveScores(); }
+    function changeSeries(p, v) { series[p] = Math.max(0, series[p] + v); saveSeries(); }
+    function resetScore() { scores = {1:0, 2:0}; saveScores(); }
+    function resetSeries() { series = {1:0, 2:0}; saveSeries(); }
 
-    async function changeSeries(p, v) {
-      let series = loadJSON("mazitek_series", {"1":0,"2":0});
-      series[p] = Math.max(0, series[p] + v);
-      await saveJSON("mazitek_series", series);
-    }
-
-    async function resetScore() {
-      await saveJSON("mazitek_scores", {"1":0,"2":0});
-    }
-
-    async function resetSeries() {
-      await saveJSON("mazitek_series", {"1":0,"2":0});
-    }
-
-    async function changeMode(mode) {
+    function changeMode(mode) {
       currentMode = mode;
-      await saveData("mazitek_mode", mode);
-      await resetScore();
-      if (mode !== "vazio") await resetBallsOnly();
+      localStorage.setItem("mazitek_mode", mode);
+      resetScore();
+      if (mode !== "vazio") resetBallsOnly();
       renderBallControls();
     }
 
     function getBallStates() {
       const key = `mazitek_ball_states_${currentMode}`;
-      return loadJSON(key, {1:[], 2:[]});
+      return JSON.parse(localStorage.getItem(key)) || {1:[], 2:[]};
     }
 
-    async function setBallStates(state) {
-      await saveJSON(`mazitek_ball_states_${currentMode}`, state);
+    function setBallStates(state) {
+      localStorage.setItem(`mazitek_ball_states_${currentMode}`, JSON.stringify(state));
     }
 
     function renderBallControls() {
@@ -360,41 +251,26 @@
       syncBallControlButtons();
     }
 
-    async function toggleSpecificBall(p, n) {
+    function toggleSpecificBall(p, n) {
       const state = getBallStates();
-      if (!state[p]) state[p] = [];
-      
-      let ball = state[p].find(b => b.text == n && !b.isFinal);
+      const ball = state[p].find(b => b.text == n && !b.isFinal);
       if (ball) {
         ball.off = !ball.off;
         const allNormalOff = state[p].filter(b => !b.isFinal).every(b => b.off);
         const final = state[p].find(b => b.isFinal);
-        if (final) final.hidden = !allNormalOff;
-        if (final && final.hidden) final.off = false;
-        await setBallStates(state);
-        syncBallControlButtons();
-      } else {
-        // Inicializa se não existir
-        const mode = MODES[currentMode];
-        const nums = p === 1 ? mode.player1 : mode.player2;
-        state[p] = nums.map(n => ({ text: String(n), off: false, hidden: false, isFinal: false }));
-        state[p].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
-        
-        ball = state[p].find(b => b.text == n && !b.isFinal);
-        if (ball) ball.off = true;
-        await setBallStates(state);
+        final.hidden = !allNormalOff;
+        if (final.hidden) final.off = false;
+        setBallStates(state);
         syncBallControlButtons();
       }
     }
 
-    async function toggleSpecificFinalBall(p) {
+    function toggleSpecificFinalBall(p) {
       const state = getBallStates();
-      if (!state[p]) return;
-      
       const final = state[p].find(b => b.isFinal);
       if (final && !final.hidden) {
         final.off = !final.off;
-        await setBallStates(state);
+        setBallStates(state);
         syncBallControlButtons();
       }
     }
@@ -402,21 +278,19 @@
     function syncBallControlButtons() {
       const state = getBallStates();
       [1, 2].forEach(p => {
-        if (state[p]) {
-          state[p].forEach(b => {
-            const btn = document.getElementById(`btn-p${p}-${b.text}${b.isFinal?'-f':''}`);
-            if (btn) {
-              btn.classList.toggle("off", b.off);
-              if (b.isFinal) {
-                btn.style.display = b.hidden ? "none" : "block";
-              }
+        state[p].forEach(b => {
+          const btn = document.getElementById(`btn-p${p}-${b.text}${b.isFinal?'-f':''}`);
+          if (btn) {
+            btn.classList.toggle("off", b.off);
+            if (b.isFinal) {
+              btn.style.display = b.hidden ? "none" : "block";
             }
-          });
-        }
+          }
+        });
       });
     }
 
-    async function resetBallsOnly() {
+    function resetBallsOnly() {
       const mode = MODES[currentMode];
       if (!mode) return;
       const state = { 1: [], 2: [] };
@@ -425,62 +299,18 @@
         nums.forEach(n => state[p].push({ text: String(n), off: false, hidden: false, isFinal: false }));
         state[p].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
       });
-      await setBallStates(state);
+      setBallStates(state);
       renderBallControls();
     }
 
-    async function resetAll() {
+    function resetAll() {
       if (confirm("Resetar tudo?")) {
-        await resetScore();
-        await resetSeries();
-        await resetBallsOnly();
+        resetScore(); resetSeries(); resetBallsOnly();
       }
     }
 
-    // ==================== INICIALIZAÇÃO ====================
-    async function initialize() {
-      // Carrega modo atual
-      currentMode = await loadData("mazitek_mode", "vazio");
-      document.getElementById("modeSelect").value = currentMode;
-      
-      // Preenche campos de input com valores atuais para referência
-      const name1 = loadData("mazitek_name_1", "JOGADOR 1");
-      const name2 = loadData("mazitek_name_2", "JOGADOR 2");
-      const city = loadData("mazitek_city", "SÃO PAULO");
-      const seriesLabel = loadData("mazitek_series_label", "SÉRIES");
-      
-      document.getElementById("inputName1").placeholder = name1;
-      document.getElementById("inputName2").placeholder = name2;
-      document.getElementById("inputCity").placeholder = city;
-      document.getElementById("inputSeriesLabel").placeholder = seriesLabel;
-      
-      renderBallControls();
-
-      // Configura listener de conexão do Firebase
-      const connectedRef = firebase.database().ref(".info/connected");
-      connectedRef.on("value", (snap) => {
-        updateStatus(snap.val() === true);
-      });
-
-      // Escuta mudanças do Firebase e sincroniza com localStorage
-      db.on("value", (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          Object.keys(data).forEach(key => {
-            localStorage.setItem(key, data[key]);
-          });
-          // Recarrega a UI se necessário
-          if (data.mazitek_mode) {
-            currentMode = data.mazitek_mode;
-            document.getElementById("modeSelect").value = currentMode;
-            renderBallControls();
-          }
-          syncBallControlButtons();
-        }
-      });
-    }
-
-    initialize();
+    initDefaults();
+    renderBallControls();
   </script>
 </body>
 </html>
