@@ -164,6 +164,21 @@ const analytics = getAnalytics(app);
       if (!localStorage.getItem("mazitek_show_series")) localStorage.setItem("mazitek_show_series", "true");
     }
 
+var db = firebase.database();
+
+function addP1() {
+  db.ref("placar/p1").transaction(function(current) {
+    return (current || 0) + 1;
+  });
+}
+
+function resetar() {
+  db.ref("placar").set({
+    p1: 0,
+    p2: 0
+  });
+}
+    
     function saveScores() { localStorage.setItem("mazitek_scores", JSON.stringify(scores)); }
     function saveSeries() { localStorage.setItem("mazitek_series", JSON.stringify(series)); }
 
