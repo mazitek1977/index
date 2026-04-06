@@ -350,60 +350,69 @@ const analytics = getAnalytics(app);
       const conf = MODES[mode];
       const showSeries = localStorage.getItem("mazitek_show_series") !== "false";
       
-      document.getElementById("seriesBar").style.display = showSeries ? "grid" : "none";
-      document.getElementById("name1").innerText = localStorage.getItem("mazitek_name_1") || "JOGADOR 1";
-      document.getElementById("name2").innerText = localStorage.getItem("mazitek_name_2") || "JOGADOR 2";
-      document.getElementById("seriesLabel").innerText = localStorage.getItem("mazitek_series_label") || "SÉRIES";
-      document.getElementById("cityValue").innerText = localStorage.getItem("mazitek_city") || "SÃO PAULO";
+     const dbRef = firebase.database().ref("placar_sinuca");
 
-      // Scores
-      const scores = JSON.parse(localStorage.getItem("mazitek_scores") || '{"1":0,"2":0}');
-      const series = JSON.parse(localStorage.getItem("mazitek_series") || '{"1":0,"2":0}');
-      document.getElementById("score1").innerText = scores[1] || 0;
-      document.getElementById("score2").innerText = scores[2] || 0;
-      document.getElementById("series1").innerText = series[1] || 0;
-      document.getElementById("series2").innerText = series[2] || 0;
+// Escuta mudanças em tempo real
+dbRef.on('value', (snapshot) => {
+  const data = snapshot.val();
+  if (!data) return;
 
-      // Lógica das Bolas
-      const bottomBar = document.getElementById("bottomBar");
-      if (!conf) {
-        bottomBar.classList.add("hidden");
-        return;
-      }
+  // Atualiza Textos
+  document.getElementById("name1").innerText = data.name1 || "JOGADOR 1";
+  document.getElementById("name2").innerText = data.name2 || "JOGADOR 2";
+  document.getElementById("cityValue").innerText = data.city || "SÃO PAULO";
+  document.getElementById("seriesLabel").innerText = data.series_label || "SÉRIES";
+  
+  // Atualiza Placar e Séries
+  document.getElementById("score1").innerText = data.score1 || 0;
+  document.getElementById("score2").innerText = data.score2 || 0;
+  document.getElementById("series1").innerText = data.series1 || 0;
+  document.getElementById("series2").innerText = data.series2 || 0;
 
-      bottomBar.classList.remove("hidden");
-      
-      // Renderiza bolas apenas se necessário (otimização)
-      const b1 = document.getElementById("balls1");
-      const b2 = document.getElementById("balls2");
-      
-      b1.innerHTML = conf.player1.map(n => createBallHTML(n, 1)).join("") + createBallHTML(conf.final, 1, true);
-      b2.innerHTML = conf.player2.map(n => createBallHTML(n, 2)).join("") + createBallHTML(conf.final, 2, true);
+  // Lógica de visibilidade das séries
+  document.getElementById("seriesBar").style.display = data.show_series === false ? "none" : "grid";
 
-      // Aplica estados (apagada ou escondida)
-      const savedBalls = JSON.parse(localStorage.getItem(`mazitek_ball_states_${mode}`) || '{}');
-      [1, 2].forEach(player => {
-        const ballEls = document.querySelectorAll(`#balls${player} .ball`);
-        ballEls.forEach(ball => {
-          const state = savedBalls[player]?.find(item => 
-            item.text === ball.innerText && item.isFinal === (ball.id === `final${player}`)
-          );
-          if (state) {
-            ball.classList.toggle("off", !!state.off);
-            ball.classList.toggle("hidden", !!state.hidden);
-          }
-        });
+  // Lógica das Bolas
+  const mode = data.mode || "vazio";
+  const conf = MODES[mode];
+  const bottomBar = document.getElementById("bottomBar");
+
+  if (!conf) {
+    bottomBar.classList.add("hidden");
+  } else {
+    bottomBar.classList.remove("hidden");
+    renderBalls(mode, conf, data[`ball_states_${mode}`]);
+  }
+});
+
+function renderBalls(mode, conf, savedBalls) {
+  const b1 = document.getElementById("balls1");
+  const b2 = document.getElementById("balls2");
+  
+  // Renderiza a estrutura se estiver vazia ou mudar o modo
+  if (b1.innerHTML === "" || b1.dataset.mode !== mode) {
+    b1.innerHTML = conf.player1.map(n => createBallHTML(n, 1)).join("") + createBallHTML(conf.final, 1, true);
+    b2.innerHTML = conf.player2.map(n => createBallHTML(n, 2)).join("") + createBallHTML(conf.final, 2, true);
+    b1.dataset.mode = mode;
+  }
+
+  // Aplica os estados vindos do Firebase
+  if (savedBalls) {
+    [1, 2].forEach(player => {
+      const ballEls = document.querySelectorAll(`#balls${player} .ball`);
+      ballEls.forEach(ball => {
+        const state = savedBalls[player]?.find(item => 
+          item.text === ball.innerText && item.isFinal === (ball.classList.contains('final-ball'))
+        );
+        if (state) {
+          ball.classList.toggle("off", !!state.off);
+          ball.classList.toggle("hidden", !!state.hidden);
+        }
       });
-    }
+    });
+  }
+}
 
-    // Inicialização
-    updateClock();
-    renderOverlayFromStorage();
-
-    // Listeners
-    window.addEventListener("storage", renderOverlayFromStorage);
-    setInterval(updateClock, 1000); // Relógio a cada 1s
-    setInterval(renderOverlayFromStorage, 2000); // Polling de segurança mais lento
-  </script>
-</body>
-</html>
+// Mantém apenas o relógio independente
+setInterval(updateClock, 1000);
+updateClock();
