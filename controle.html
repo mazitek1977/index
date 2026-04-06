@@ -167,144 +167,48 @@ const analytics = getAnalytics(app);
     function saveScores() { localStorage.setItem("mazitek_scores", JSON.stringify(scores)); }
     function saveSeries() { localStorage.setItem("mazitek_series", JSON.stringify(series)); }
 
-    function updateName(p) {
-      const el = document.getElementById("inputName" + p);
-      if (el.value) {
-        localStorage.setItem("mazitek_name_" + p, el.value.toUpperCase());
-        el.placeholder = el.value.toUpperCase();
-        el.value = "";
-      }
-    }
+   // Referência simplificada para o nó principal
+const dbRef = firebase.database().ref("placar_sinuca");
 
-    function updateCity() {
-      const el = document.getElementById("inputCity");
-      if (el.value) {
-        localStorage.setItem("mazitek_city", el.value.toUpperCase());
-        el.placeholder = el.value.toUpperCase();
-        el.value = "";
-      }
-    }
+function updateName(p) {
+  const el = document.getElementById("inputName" + p);
+  if (el.value) {
+    const nome = el.value.toUpperCase();
+    dbRef.update({ ["name" + p]: nome });
+    el.placeholder = nome;
+    el.value = "";
+  }
+}
 
-    function updateSeriesLabel() {
-      const el = document.getElementById("inputSeriesLabel");
-      if (el.value) {
-        localStorage.setItem("mazitek_series_label", el.value.toUpperCase());
-        el.placeholder = el.value.toUpperCase();
-        el.value = "";
-      }
-    }
+function updateCity() {
+  const el = document.getElementById("inputCity");
+  if (el.value) {
+    const cidade = el.value.toUpperCase();
+    dbRef.update({ city: cidade });
+    el.placeholder = cidade;
+    el.value = "";
+  }
+}
 
-    function toggleSeries() {
-      const current = localStorage.getItem("mazitek_show_series") === "true";
-      localStorage.setItem("mazitek_show_series", !current);
-      alert("Exibição da série: " + (!current ? "LIGADO" : "DESLIGADO"));
-    }
+function changeScore(p, v) {
+  scores[p] = Math.max(0, scores[p] + v);
+  dbRef.update({ [`score${p}`]: scores[p] });
+}
 
-    function changeScore(p, v) { scores[p] = Math.max(0, scores[p] + v); saveScores(); }
-    function changeSeries(p, v) { series[p] = Math.max(0, series[p] + v); saveSeries(); }
-    function resetScore() { scores = {1:0, 2:0}; saveScores(); }
-    function resetSeries() { series = {1:0, 2:0}; saveSeries(); }
+function changeSeries(p, v) {
+  series[p] = Math.max(0, series[p] + v);
+  dbRef.update({ [`series${p}`]: series[p] });
+}
 
-    function changeMode(mode) {
-      currentMode = mode;
-      localStorage.setItem("mazitek_mode", mode);
-      resetScore();
-      if (mode !== "vazio") resetBallsOnly();
-      renderBallControls();
-    }
+function changeMode(mode) {
+  currentMode = mode;
+  dbRef.update({ mode: mode });
+  resetScore();
+  if (mode !== "vazio") resetBallsOnly();
+  renderBallControls();
+}
 
-    function getBallStates() {
-      const key = `mazitek_ball_states_${currentMode}`;
-      return JSON.parse(localStorage.getItem(key)) || {1:[], 2:[]};
-    }
-
-    function setBallStates(state) {
-      localStorage.setItem(`mazitek_ball_states_${currentMode}`, JSON.stringify(state));
-    }
-
-    function renderBallControls() {
-      const c1 = document.getElementById("ballControls1");
-      const c2 = document.getElementById("ballControls2");
-      c1.innerHTML = ""; c2.innerHTML = "";
-      if (currentMode === "vazio") return;
-
-      const mode = MODES[currentMode];
-      const createBtn = (n, p, isFinal) => {
-        const btn = document.createElement("button");
-        btn.className = `ball-control-btn ${p===1?'btn-blue':'btn-orange'} ball-p${p} ${isFinal?'final-control':''}`;
-        btn.id = `btn-p${p}-${n}${isFinal?'-f':''}`;
-        btn.innerText = isFinal ? "F" : n;
-        btn.onclick = () => isFinal ? toggleSpecificFinalBall(p) : toggleSpecificBall(p, n);
-        return btn;
-      };
-
-      mode.player1.forEach(n => c1.appendChild(createBtn(n, 1, false)));
-      c1.appendChild(createBtn(mode.final, 1, true));
-      mode.player2.forEach(n => c2.appendChild(createBtn(n, 2, false)));
-      c2.appendChild(createBtn(mode.final, 2, true));
-      syncBallControlButtons();
-    }
-
-    function toggleSpecificBall(p, n) {
-      const state = getBallStates();
-      const ball = state[p].find(b => b.text == n && !b.isFinal);
-      if (ball) {
-        ball.off = !ball.off;
-        const allNormalOff = state[p].filter(b => !b.isFinal).every(b => b.off);
-        const final = state[p].find(b => b.isFinal);
-        final.hidden = !allNormalOff;
-        if (final.hidden) final.off = false;
-        setBallStates(state);
-        syncBallControlButtons();
-      }
-    }
-
-    function toggleSpecificFinalBall(p) {
-      const state = getBallStates();
-      const final = state[p].find(b => b.isFinal);
-      if (final && !final.hidden) {
-        final.off = !final.off;
-        setBallStates(state);
-        syncBallControlButtons();
-      }
-    }
-
-    function syncBallControlButtons() {
-      const state = getBallStates();
-      [1, 2].forEach(p => {
-        state[p].forEach(b => {
-          const btn = document.getElementById(`btn-p${p}-${b.text}${b.isFinal?'-f':''}`);
-          if (btn) {
-            btn.classList.toggle("off", b.off);
-            if (b.isFinal) {
-              btn.style.display = b.hidden ? "none" : "block";
-            }
-          }
-        });
-      });
-    }
-
-    function resetBallsOnly() {
-      const mode = MODES[currentMode];
-      if (!mode) return;
-      const state = { 1: [], 2: [] };
-      [1, 2].forEach(p => {
-        const nums = p === 1 ? mode.player1 : mode.player2;
-        nums.forEach(n => state[p].push({ text: String(n), off: false, hidden: false, isFinal: false }));
-        state[p].push({ text: String(mode.final), off: false, hidden: true, isFinal: true });
-      });
-      setBallStates(state);
-      renderBallControls();
-    }
-
-    function resetAll() {
-      if (confirm("Resetar tudo?")) {
-        resetScore(); resetSeries(); resetBallsOnly();
-      }
-    }
-
-    initDefaults();
-    renderBallControls();
-  </script>
-</body>
-</html>
+// Atualize a função de salvar estados das bolas
+function setBallStates(state) {
+  dbRef.update({ [`ball_states_${currentMode}`]: state });
+}
