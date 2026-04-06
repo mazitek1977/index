@@ -356,7 +356,15 @@ const analytics = getAnalytics(app);
 dbRef.on('value', (snapshot) => {
   const data = snapshot.val();
   if (!data) return;
+  
+var db = firebase.database();
 
+db.ref("placar").on("value", function(snapshot) {
+  var data = snapshot.val();
+
+  document.getElementById("p1").innerText = data.p1;
+  document.getElementById("p2").innerText = data.p2;
+});
   // Atualiza Textos
   document.getElementById("name1").innerText = data.name1 || "JOGADOR 1";
   document.getElementById("name2").innerText = data.name2 || "JOGADOR 2";
